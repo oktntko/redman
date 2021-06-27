@@ -7,8 +7,8 @@ name = "pypi"
 main = "python -m redman"
 
 [packages]
-plumbum = "*"
 texttable = "*"
+fire = "*"
 
 [dev-packages]
 
