@@ -1,0 +1,3 @@
+import redman
+
+redman.main()
