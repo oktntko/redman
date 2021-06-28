@@ -11,6 +11,7 @@ build = "python setup.py sdist"
 [packages]
 texttable = "1.6.3"
 fire = "0.4.0"
+pyyaml = "*"
 
 [dev-packages]
 twine = "*"
