@@ -1,3 +1,4 @@
-import redman
+from .cli import main
 
-redman.main()
+if __name__ == "__main__":
+    main()

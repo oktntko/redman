@@ -5,12 +5,15 @@ name = "pypi"
 
 [scripts]
 main = "python -m redman"
+build = "python setup.py sdist"
+#upload = "twine upload --repository pypi dist/*"
 
 [packages]
-texttable = "*"
-fire = "*"
+texttable = "1.6.3"
+fire = "0.4.0"
 
 [dev-packages]
+twine = "*"
 
 [requires]
 python_version = "3.9"
