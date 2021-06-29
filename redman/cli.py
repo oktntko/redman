@@ -1,25 +1,14 @@
-
-import re
 import subprocess
 
 from fire import Fire
 from texttable import Texttable
 
+from .color import Color
 from .redmanrc import (create_config_file_default_if_not_exists,
                        edit_config_file, load_config)
 from .redmine_api import (list_issues, list_projects, list_users, show_issue,
                           show_project, show_user)
-
-# 設定ファイルのチェック
-# 必要コマンドのチェック
-# --config=~/.redconfig
-# default: my-redmine
-# my-redmine:
-#   - url: "localhost:13000"
-#   - api_key: "bb2fcbf8e06106f10e9dfe6bcf828b9fa8774884"
-#   - user_name: "user_name"
-#   - password: "passworde"
-# --redmine-name=default
+from .sh_fzf import fzf_issues
 
 
 def projects(redine_name: str = None) -> None:
@@ -77,14 +66,15 @@ def issues(project: str, redine_name: str = None) -> None:
         return
 
     rows = [[
-        "TRACKER", "STATUS", "PRIORITY", "#NO SUBJECT", "DESCRIPTION"
+        "ID", "SUBJECT", "TRACKER", "STATUS", "PRIORITY", "DESCRIPTION"
     ]]
 
     rows.extend([[
+        issue.get("id"),
+        issue.get("subject"),
         issue.get("tracker").get("name"),
         issue.get("status").get("name"),
         issue.get("priority").get("name"),
-        f"#{issue.get('id')} {issue.get('subject')}",
         issue.get("description"),
     ] for issue in issues])
 
@@ -92,16 +82,24 @@ def issues(project: str, redine_name: str = None) -> None:
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
-    _ = subprocess.run(
-        f"echo '{table.draw()}' | fzf --header-lines=2",
-        shell=True, check=False, stdout=subprocess.PIPE) \
-        .stdout.decode("utf-8").strip()
-    m = re.search(r"#.*\|", _)
-    if m:
-        b = m.group()[:-1].strip()
-        print(b)
-
+    fzf_issues(table.draw(), url, api_key)
     return
+
+
+def issue(id: str, url: str, api_key: str) -> None:
+    body = show_issue(url, api_key, id)
+
+    issue = body.get("issue")
+    preview = f"""
+{issue.get("tracker").get("name")}
+
+{Color.背景緑} {Color.RESET} {Color.緑}{Color.BOLD}#{issue.get("id")} {issue.get("subject")}{Color.RESET}
+------------------------------------------------
+ {issue.get("status").get("name")} | {issue.get("priority").get("name")} |
+------------------------------------------------
+{issue.get("description")}
+    """
+    print(preview)
 
 
 def config() -> None:
@@ -115,5 +113,8 @@ def main() -> None:
         "projects": projects,
         "users": users,
         "issues": issues,
+        "show": {
+            "issue": issue,
+        },
         "config": config,
     })

@@ -11,7 +11,7 @@ upload = "twine upload --repository pypi dist/*"
 [packages]
 texttable = "1.6.3"
 fire = "0.4.0"
-pyyaml = "*"
+pyyaml = "5.4.1"
 
 [dev-packages]
 twine = "*"
