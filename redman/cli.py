@@ -1,19 +1,14 @@
-import json
-import os
+
 import re
 import subprocess
-from urllib import error, parse, request
 
-import yaml
 from fire import Fire
 from texttable import Texttable
 
-REDMINE_URL = "http://localhost:13000"
-REDMIEN_API_KEI = "bb2fcbf8e06106f10e9dfe6bcf828b9fa8774884"
-REDMIEN_USER_NAME = ""
-REDMIEN_PASSWORD = ""
-
-REDMANRC = os.path.join(os.path.expanduser("~"), ".redmanrc")
+from .redmanrc import (create_config_file_default_if_not_exists,
+                       edit_config_file, load_config)
+from .redmine_api import (list_issues, list_projects, list_users, show_issue,
+                          show_project, show_user)
 
 # 設定ファイルのチェック
 # 必要コマンドのチェック
@@ -27,20 +22,14 @@ REDMANRC = os.path.join(os.path.expanduser("~"), ".redmanrc")
 # --redmine-name=default
 
 
-def projects() -> None:
-    params = {
-        "key": REDMIEN_API_KEI
-    }
-    req = request.Request(f"{REDMINE_URL}/projects.json?{parse.urlencode(params)}")
-    try:
-        with request.urlopen(req) as res:
-            body = json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
+def projects(redine_name: str = None) -> None:
+
+    url, api_key = load_config(redine_name)
+    if not url or not api_key:
+        print("invalidate config")
         return
-    except error.URLError as err:
-        print(err.reason)
-        return
+
+    body = list_projects(url, api_key)
 
     projects = body.get("projects")
     if len(projects) <= 0:
@@ -73,22 +62,14 @@ def users() -> None:
     pass
 
 
-def issues(project: str) -> None:
-    params = {
-        "key": REDMIEN_API_KEI,
-        "project": project,
-        "op[status_id]": "o"
-    }
-    req = request.Request(f"{REDMINE_URL}/issues.json?{parse.urlencode(params)}")
-    try:
-        with request.urlopen(req) as res:
-            body = json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
+def issues(project: str, redine_name: str = None) -> None:
+
+    url, api_key = load_config(redine_name)
+    if not url or not api_key:
+        print("invalidate config")
         return
-    except error.URLError as err:
-        print(err.reason)
-        return
+
+    body = list_issues(url, api_key, project)
 
     issues = body.get("issues")
     if len(issues) <= 0:
@@ -120,22 +101,13 @@ def issues(project: str) -> None:
         b = m.group()[:-1].strip()
         print(b)
 
+    return
+
 
 def config() -> None:
-    if not os.path.exists(REDMANRC):
-        config_file_default = {
-            "default": "my-project",
-            "my-project": {
-                "REDMINE_URL": "<your Redmine url>",
-                "REDMINE_API_ACCESS_KEY": "<your Redmine Access Key>"
-            }
-        }
-        with open(REDMANRC, "a", encoding="UTF-8") as config_file:
-            yaml.dump(config_file_default, config_file)
+    create_config_file_default_if_not_exists()
 
-    _ = subprocess.run(
-        f"eval ${{EDITOR:-vi}} {REDMANRC}",
-        shell=True, check=False)
+    edit_config_file()
 
 
 def main() -> None:
