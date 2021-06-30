@@ -1,5 +1,9 @@
+from __future__ import annotations
+# https://stackoverflow.com/questions/33533148/how-do-i-type-hint-a-method-with-the-type-of-the-enclosing-class
+
 import json
-from typing import Any
+from enum import Enum
+from typing import Any, Optional
 from urllib import error, parse, request
 
 
@@ -43,16 +47,36 @@ def show_user() -> None:
 ################################
 # issues
 ################################
-def list_issues(url: str, api_key: str, project: str) -> Any:
+class IssueStatus(Enum):
+    OPEN = "o", "o"
+    CLOSED = "c", "c"
+    ALL = "*", "a"
+
+    @classmethod
+    def value_of(cls, value: Optional[str]) -> IssueStatus:
+        if not value:
+            return IssueStatus.OPEN
+
+        for e in IssueStatus:
+            if value.startswith(e.value[1]):
+                return e
+
+        return IssueStatus.OPEN
+
+
+def list_issues(base_url: str, api_key: str, project: str, status: IssueStatus = IssueStatus.OPEN) -> Any:
     """GET /issues.[format]"""
     try:
         params = {
             "key": api_key,
-            "project": project,
-            "op[status_id]": "o"
+            "sort": "due_date,id",
+            "f[]": "status_id",
+            "op[status_id]": status.value[0],
         }
 
-        req = request.Request(f"{url}/issues.json?{parse.urlencode(params)}")
+        url = f"{base_url}/projects/{project}/issues.json?{parse.urlencode(params)}"
+
+        req = request.Request(url)
 
         with request.urlopen(req) as res:
             return json.load(res)

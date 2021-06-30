@@ -1,14 +1,12 @@
-import subprocess
-
 from fire import Fire
 from texttable import Texttable
 
 from .color import Color
 from .redmanrc import (create_config_file_default_if_not_exists,
                        edit_config_file, load_config)
-from .redmine_api import (list_issues, list_projects, list_users, show_issue,
-                          show_project, show_user)
-from .sh_fzf import fzf_issues
+from .redmine_api import (IssueStatus, list_issues, list_projects, list_users,
+                          show_issue, show_project, show_user)
+from .sh_fzf import fzf_issues, fzf_projects
 
 
 def projects(redine_name: str = None) -> None:
@@ -26,10 +24,9 @@ def projects(redine_name: str = None) -> None:
         return
 
     rows = [[
-        "NO", "ID", "NAME", "DESCRIPTION",
+        "ID", "NAME", "DESCRIPTION",
     ]]
     rows.extend([[
-        project.get("id"),
         project.get("identifier"),
         project.get("name"),
         project.get("description"),
@@ -39,11 +36,7 @@ def projects(redine_name: str = None) -> None:
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
-    _ = subprocess.run(
-        f"echo '{table.draw()}' | fzf --header-lines=2",
-        shell=True, check=False, stdout=subprocess.PIPE) \
-        .stdout.decode("utf-8").strip()
-    print(_)
+    fzf_projects(table.draw())
     return
 
 
@@ -51,14 +44,15 @@ def users() -> None:
     pass
 
 
-def issues(project: str, redine_name: str = None) -> None:
+def issues(project: str, redine_name: str = None, status: str = "open") -> None:
+    print(project)
 
     url, api_key = load_config(redine_name)
     if not url or not api_key:
         print("invalidate config")
         return
 
-    body = list_issues(url, api_key, project)
+    body = list_issues(url, api_key, project, IssueStatus.value_of(status))
 
     issues = body.get("issues")
     if len(issues) <= 0:
@@ -66,19 +60,21 @@ def issues(project: str, redine_name: str = None) -> None:
         return
 
     rows = [[
-        "ID", "SUBJECT", "TRACKER", "STATUS", "PRIORITY", "DESCRIPTION"
+        "ID", "TRACKER", "STATUS", "PRIORITY", "SUBJECT", "ASSIGNED", "DUE_DATE", "DESCRIPTION"
     ]]
 
     rows.extend([[
         issue.get("id"),
-        issue.get("subject"),
         issue.get("tracker").get("name"),
         issue.get("status").get("name"),
         issue.get("priority").get("name"),
-        issue.get("description"),
+        issue.get("subject"),
+        issue.get("assigned_to", {}).get("name"),
+        issue.get("due_date"),
+        issue.get("description").replace("\n", " "),
     ] for issue in issues])
 
-    table = Texttable()
+    table = Texttable(max_width=0)
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
@@ -90,8 +86,7 @@ def issue(id: str, url: str, api_key: str) -> None:
     body = show_issue(url, api_key, id)
 
     issue = body.get("issue")
-    preview = f"""
-{issue.get("tracker").get("name")}
+    preview = f"""{issue.get("tracker").get("name")}
 
 {Color.背景緑} {Color.RESET} {Color.緑}{Color.BOLD}#{issue.get("id")} {issue.get("subject")}{Color.RESET}
 ------------------------------------------------
