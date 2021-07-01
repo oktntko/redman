@@ -17,17 +17,23 @@ FZF_OPTIONS = "--header-lines=2 \
     --preview-window=down:50%:rounded:wrap"
 
 
-def fzf_projects(echo: str) -> None:
-    subprocess.run(
-        f"echo \"{echo}\" | fzf {FZF_OPTIONS} \
-            --bind=\"enter:abort+execute(python -m redman issues {{1}})\"",
+def fzf(stdin: str, options: str = "") -> str:
+    return subprocess.run(
+        f"echo \"{stdin}\" | fzf {FZF_OPTIONS} {options}",
         shell=True, check=False, stdout=subprocess.PIPE) \
         .stdout.decode("utf-8").strip()
 
 
-def fzf_issues(echo: str, url: str, api_key: str) -> None:
-    subprocess.run(
-        f"echo \"{echo}\" | fzf {FZF_OPTIONS} \
-            --preview=\"python -m redman show issue {{1}} {url} {api_key}\"",
-        shell=True, check=False, stdout=subprocess.PIPE) \
-        .stdout.decode("utf-8").strip()
+def fzf_projects(stdin: str) -> str:
+    return fzf(stdin,
+               "--bind=\"enter:abort+execute(python -m redman issues --project_id={1})\"")
+
+
+def fzf_issues(stdin: str, url: str, api_key: str) -> str:
+    return fzf(stdin, f"--preview=\"python -m redman show issue {{1}} {url} {api_key}\"")
+
+
+def fzf_users(stdin: str, url: str, api_key: str) -> str:
+    return fzf(stdin,
+               f"--preview=\"python -m redman show user {{1}} {url} {api_key}\" \
+                 --bind=\"enter:abort+execute(python -m redman issues --user_id={{1}})\"")

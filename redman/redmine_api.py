@@ -10,13 +10,13 @@ from urllib import error, parse, request
 ################################
 # projects
 ################################
-def list_projects(url: str, api_key: str) -> Any:
+def list_projects(base_url: str, api_key: str) -> Any:
     """GET /projects.[format]"""
     try:
         params = {
             "key": api_key
         }
-        req = request.Request(f"{url}/projects.json?{parse.urlencode(params)}")
+        req = request.Request(f"{base_url}/projects.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
             return json.load(res)
@@ -36,12 +36,61 @@ def show_project() -> None:
 ################################
 # users
 ################################
-def list_users() -> None:
-    pass
+class UserStatus(Enum):
+    ANONYMOUS = 0
+    ACTIVE = 1
+    REGISTERED = 2
+    LOCKED = 3
+    UNKNOWN = -1
+
+    @classmethod
+    def value_of(cls, value: Optional[int]) -> UserStatus:
+        if not value:
+            return UserStatus.UNKNOWN
+
+        for e in UserStatus:
+            if value == e.value:
+                return e
+
+        return UserStatus.UNKNOWN
 
 
-def show_user() -> None:
-    pass
+def list_users(base_url: str, api_key: str) -> Any:
+    """GET /users.json"""
+    try:
+        params = {
+            "key": api_key
+        }
+        req = request.Request(f"{base_url}/users.json?{parse.urlencode(params)}")
+
+        with request.urlopen(req) as res:
+            return json.load(res)
+    except error.HTTPError as err:
+        print(err.code)
+        return
+    except error.URLError as err:
+        print(err.reason)
+        return
+
+
+def show_user(base_url: str, api_key: str, id: str) -> Any:
+    """GET /users/[id].[format]"""
+    try:
+        params = {
+            "key": api_key,
+            "include": "memberships,groups",
+        }
+
+        req = request.Request(f"{base_url}/users/{id}.json?{parse.urlencode(params)}")
+
+        with request.urlopen(req) as res:
+            return json.load(res)
+    except error.HTTPError as err:
+        print(err.code)
+        return
+    except error.URLError as err:
+        print(err.reason)
+        return
 
 
 ################################
@@ -64,7 +113,7 @@ class IssueStatus(Enum):
         return IssueStatus.OPEN
 
 
-def list_issues(base_url: str, api_key: str, project: str, status: IssueStatus = IssueStatus.OPEN) -> Any:
+def list_issues(base_url: str, api_key: str, status: IssueStatus = IssueStatus.OPEN, project_id: str = None, user_id: str = None) -> Any:
     """GET /issues.[format]"""
     try:
         params = {
@@ -74,7 +123,17 @@ def list_issues(base_url: str, api_key: str, project: str, status: IssueStatus =
             "op[status_id]": status.value[0],
         }
 
-        url = f"{base_url}/projects/{project}/issues.json?{parse.urlencode(params)}"
+        if project_id:
+            params["f[]"] = "project_id"
+            params["op[project_id]"] = "="
+            params["v[project_id][]"] = project_id
+
+        if user_id:
+            params["f[]"] = "assigned_to_id"
+            params["op[assigned_to_id]"] = "="
+            params["v[assigned_to_id][]"] = user_id
+
+        url = f"{base_url}/issues.json?{parse.urlencode(params)}"
 
         req = request.Request(url)
 
@@ -88,14 +147,14 @@ def list_issues(base_url: str, api_key: str, project: str, status: IssueStatus =
         return
 
 
-def show_issue(url: str, api_key: str, id: str) -> Any:
+def show_issue(base_url: str, api_key: str, id: str) -> Any:
     """GET /issues/[id].[format]"""
     try:
         params = {
             "key": api_key,
         }
 
-        req = request.Request(f"{url}/issues/{id}.json?{parse.urlencode(params)}")
+        req = request.Request(f"{base_url}/issues/{id}.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
             return json.load(res)
