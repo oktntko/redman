@@ -3,14 +3,14 @@ from __future__ import annotations
 
 import json
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 from urllib import error, parse, request
 
 
 ################################
 # projects
 ################################
-def list_projects(base_url: str, api_key: str) -> Any:
+def list_projects(base_url: str, api_key: str) -> Tuple[Any, Optional[error.URLError]]:
     """GET /projects.[format]"""
     try:
         params = {
@@ -19,18 +19,9 @@ def list_projects(base_url: str, api_key: str) -> Any:
         req = request.Request(f"{base_url}/projects.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
-            return json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
-        return
+            return json.load(res), None
     except error.URLError as err:
-        print(err.reason)
-        return
-
-
-def show_project() -> None:
-    """GET /projects/[id].[format]"""
-    pass
+        return None, err
 
 
 ################################
@@ -55,7 +46,7 @@ class UserStatus(Enum):
         return UserStatus.UNKNOWN
 
 
-def list_users(base_url: str, api_key: str) -> Any:
+def list_users(base_url: str, api_key: str) -> Tuple[Any, Optional[error.URLError]]:
     """GET /users.json"""
     try:
         params = {
@@ -64,16 +55,12 @@ def list_users(base_url: str, api_key: str) -> Any:
         req = request.Request(f"{base_url}/users.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
-            return json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
-        return
+            return json.load(res), None
     except error.URLError as err:
-        print(err.reason)
-        return
+        return None, err
 
 
-def show_user(base_url: str, api_key: str, id: str) -> Any:
+def show_user(base_url: str, api_key: str, id: str) -> Tuple[Any, Optional[error.URLError]]:
     """GET /users/[id].[format]"""
     try:
         params = {
@@ -84,13 +71,9 @@ def show_user(base_url: str, api_key: str, id: str) -> Any:
         req = request.Request(f"{base_url}/users/{id}.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
-            return json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
-        return
+            return json.load(res), None
     except error.URLError as err:
-        print(err.reason)
-        return
+        return None, err
 
 
 ################################
@@ -113,7 +96,9 @@ class IssueStatus(Enum):
         return IssueStatus.OPEN
 
 
-def list_issues(base_url: str, api_key: str, status: IssueStatus = IssueStatus.OPEN, project_id: str = None, user_id: str = None) -> Any:
+def list_issues(base_url: str, api_key: str,
+                status: IssueStatus = IssueStatus.OPEN, project_id: str = None, user_id: str = None
+                ) -> Tuple[Any, Optional[error.URLError]]:
     """GET /issues.[format]"""
     try:
         params = {
@@ -138,16 +123,12 @@ def list_issues(base_url: str, api_key: str, status: IssueStatus = IssueStatus.O
         req = request.Request(url)
 
         with request.urlopen(req) as res:
-            return json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
-        return
+            return json.load(res), None
     except error.URLError as err:
-        print(err.reason)
-        return
+        return None, err
 
 
-def show_issue(base_url: str, api_key: str, id: str) -> Any:
+def show_issue(base_url: str, api_key: str, id: str) -> Tuple[Any, Optional[error.URLError]]:
     """GET /issues/[id].[format]"""
     try:
         params = {
@@ -157,10 +138,6 @@ def show_issue(base_url: str, api_key: str, id: str) -> Any:
         req = request.Request(f"{base_url}/issues/{id}.json?{parse.urlencode(params)}")
 
         with request.urlopen(req) as res:
-            return json.load(res)
-    except error.HTTPError as err:
-        print(err.code)
-        return
+            return json.load(res), None
     except error.URLError as err:
-        print(err.reason)
-        return
+        return None, err

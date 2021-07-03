@@ -4,9 +4,9 @@ from texttable import Texttable
 from .color import Color
 from .redmanrc import (create_config_file_default_if_not_exists,
                        edit_config_file, load_config)
-from .redmine_api import (IssueStatus, UserStatus, list_issues, list_projects, list_users,
-                          show_issue, show_project, show_user)
-from .sh_fzf import fzf_issues, fzf_projects, fzf_users
+from .redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
+                          list_users, show_issue, show_user)
+from .sh_fzf import fzf
 
 
 def projects(redine_name: str = None) -> None:
@@ -16,7 +16,10 @@ def projects(redine_name: str = None) -> None:
         print("invalidate config")
         return
 
-    body = list_projects(url, api_key)
+    body, err = list_projects(url, api_key)
+    if err:
+        print(err.reason)
+        return
 
     projects = body.get("projects")
     if len(projects) <= 0:
@@ -37,17 +40,21 @@ def projects(redine_name: str = None) -> None:
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
-    fzf_projects(table.draw())
-    return
+    fzf(table.draw(),
+        "--bind=\"enter:abort+execute(python -m redman issues --project_id={1} | more > /dev/tty)\"")
 
 
 def users(redine_name: str = None) -> None:
+
     url, api_key = load_config(redine_name)
     if not url or not api_key:
         print("invalidate config")
         return
 
-    body = list_users(url, api_key)
+    body, err = list_users(url, api_key)
+    if err:
+        print(err.reason)
+        return
 
     users = body.get("users")
     if len(users) <= 0:
@@ -70,12 +77,22 @@ def users(redine_name: str = None) -> None:
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
-    fzf_users(table.draw(), url, api_key)
-    return
+    fzf(table.draw(),
+        f"--preview=\"python -m redman show user {{1}} {redine_name}\" \
+          --bind=\"enter:abort+execute(python -m redman issues --user_id={{1}} | less -R > /dev/tty)\"")
 
 
-def user(id: str, url: str, api_key: str) -> None:
-    body = show_user(url, api_key, id)
+def user(id: str, redine_name: str = None) -> None:
+
+    url, api_key = load_config(redine_name)
+    if not url or not api_key:
+        print("invalidate config")
+        return
+
+    body, err = show_user(url, api_key, id)
+    if err:
+        print(err.reason)
+        return
 
     user = body.get("user")
     preview = f"""{Color.背景緑} {Color.RESET} {user.get("lastname") + " " + user.get("firstname")}
@@ -95,12 +112,16 @@ def user(id: str, url: str, api_key: str) -> None:
 
 
 def issues(redine_name: str = None, status: str = "open", project_id: str = None, user_id: str = None) -> None:
+
     url, api_key = load_config(redine_name)
     if not url or not api_key:
         print("invalidate config")
         return
 
-    body = list_issues(url, api_key, IssueStatus.value_of(status), project_id, user_id)
+    body, err = list_issues(url, api_key, IssueStatus.value_of(status), project_id, user_id)
+    if err:
+        print(err.reason)
+        return
 
     issues = body.get("issues")
     if len(issues) <= 0:
@@ -126,12 +147,32 @@ def issues(redine_name: str = None, status: str = "open", project_id: str = None
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(rows)
 
-    fzf_issues(table.draw(), url, api_key)
-    return
+    stdin = table.draw()
+    result = fzf(stdin,
+                 f"--preview=\"python -m redman show issue {{1}} {redine_name}\"")
+    if not result:
+        return
+
+    result = result.strip()
+
+    for i, row in enumerate(stdin.splitlines()):
+        row = row.strip()
+        if row == result:
+            print(f"""#{issues[i - 2].get("id")} {issues[i - 2].get("subject")}""")
+            return
 
 
-def issue(id: str, url: str, api_key: str) -> None:
-    body = show_issue(url, api_key, id)
+def issue(id: str, redine_name: str = None) -> None:
+
+    url, api_key = load_config(redine_name)
+    if not url or not api_key:
+        print("invalidate config")
+        return
+
+    body, err, = show_issue(url, api_key, id)
+    if err:
+        print(err.reason)
+        return
 
     issue = body.get("issue")
     preview = f"""{issue.get("tracker").get("name")}

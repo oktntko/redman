@@ -22,18 +22,3 @@ def fzf(stdin: str, options: str = "") -> str:
         f"echo \"{stdin}\" | fzf {FZF_OPTIONS} {options}",
         shell=True, check=False, stdout=subprocess.PIPE) \
         .stdout.decode("utf-8").strip()
-
-
-def fzf_projects(stdin: str) -> str:
-    return fzf(stdin,
-               "--bind=\"enter:abort+execute(python -m redman issues --project_id={1})\"")
-
-
-def fzf_issues(stdin: str, url: str, api_key: str) -> str:
-    return fzf(stdin, f"--preview=\"python -m redman show issue {{1}} {url} {api_key}\"")
-
-
-def fzf_users(stdin: str, url: str, api_key: str) -> str:
-    return fzf(stdin,
-               f"--preview=\"python -m redman show user {{1}} {url} {api_key}\" \
-                 --bind=\"enter:abort+execute(python -m redman issues --user_id={{1}})\"")
