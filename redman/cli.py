@@ -2,6 +2,7 @@ from fire import Fire
 from texttable import Texttable
 
 from .color import Color
+from .redman_history import add_history, load_history
 from .redmanrc import (create_config_file_default_if_not_exists,
                        edit_config_file, load_config)
 from .redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
@@ -79,7 +80,7 @@ def users(redine_name: str = None) -> None:
 
     fzf(table.draw(),
         f"--preview=\"python -m redman show user {{1}} {redine_name}\" \
-          --bind=\"enter:abort+execute(python -m redman issues --user_id={{1}} | less -R > /dev/tty)\"")
+          --bind=\"enter:abort+execute(python -m redman issues --user_id={{1}} | more > /dev/tty)\"")
 
 
 def user(id: str, redine_name: str = None) -> None:
@@ -155,6 +156,8 @@ def issues(redine_name: str = None, status: str = "open", project_id: str = None
 
     result = result.strip()
 
+    add_history(redine_name, status, project_id, user_id)
+
     for i, row in enumerate(stdin.splitlines()):
         row = row.strip()
         if row == result:
@@ -186,6 +189,24 @@ def issue(id: str, redine_name: str = None) -> None:
     print(preview)
 
 
+def history() -> None:
+    history_list = load_history()
+    if not history_list:
+        issues()
+        return
+
+    history_list.reverse()
+    for history in history_list:
+        if history.count("\t") == 3:
+            redine_name, status, project_id, user_id = history.split("\t")
+            break
+
+    issues(redine_name if redine_name else None,
+           status if status else "open",
+           project_id if project_id else None,
+           user_id if user_id else None)
+
+
 def config() -> None:
     create_config_file_default_if_not_exists()
 
@@ -194,6 +215,7 @@ def config() -> None:
 
 def main() -> None:
     Fire({
+        "history": history,
         "projects": projects,
         "users": users,
         "issues": issues,
