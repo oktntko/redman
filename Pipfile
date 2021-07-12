@@ -6,7 +6,7 @@ name = "pypi"
 [scripts]
 main = "python -m redman"
 build = "python setup.py sdist"
-upload = "twine upload --repository pypi dist/*"
+# upload = "twine upload --repository pypi dist/*"
 
 [packages]
 texttable = "1.6.3"
@@ -14,9 +14,10 @@ fire = "0.4.0"
 pyyaml = "5.4.1"
 
 [dev-packages]
-twine = "*"
+wheel = "*"
+setuptools = "*"
 types-pyyaml = "*"
-pyinstaller = "*"
+build = "*"
 
 [requires]
 python_version = "3.9"
