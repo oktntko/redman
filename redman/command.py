@@ -1,3 +1,6 @@
+# -*- coding=utf-8 -*-
+from __future__ import absolute_import
+
 from fire import Fire
 from texttable import Texttable
 
@@ -225,3 +228,7 @@ def main() -> None:
         },
         "config": config,
     })
+
+
+if __name__ == "__main__":
+    main()

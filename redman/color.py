@@ -1,3 +1,7 @@
+# -*- coding=utf-8 -*-
+from __future__ import absolute_import
+
+
 class Color:
     # https://www.mm2d.net/main/prog/c/console-02.html
 
