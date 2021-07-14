@@ -14,10 +14,10 @@ def create_history_file_default_if_not_exists() -> None:
             file.write("")
 
 
-def add_history(redine_name: str = None, status: str = "open", project_id: str = None, user_id: str = None) -> None:
+def add_history(redmine_name: str = None, status: str = "open", project_id: str = None, user_id: str = None) -> None:
 
     history = "\t".join([
-        str(redine_name) if redine_name else "",
+        str(redmine_name) if redmine_name else "",
         str(status) if status else "",
         str(project_id) if project_id else "",
         str(user_id) if user_id else "",

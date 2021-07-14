@@ -4,14 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-main = "python redman/command.py"
+main = "python -m redman"
 build = "python setup.py sdist"
 upload = "twine upload --repository pypi dist/*"
 
 [packages]
 texttable = "1.6.3"
-fire = "0.4.0"
 pyyaml = "5.4.1"
+click = "8.0.1"
 
 [dev-packages]
 wheel = "*"
