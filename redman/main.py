@@ -1,6 +1,4 @@
 # -*- coding=utf-8 -*-
-from __future__ import absolute_import
-
 from shutil import which
 from typing import Optional
 
@@ -8,13 +6,13 @@ import click
 from click.core import Context
 from texttable import Texttable
 
-from .color import Color
-from .redman_history import add_history, load_history
-from .redmanrc import (create_config_file_default_if_not_exists,
-                       edit_config_file, load_config)
-from .redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
-                          list_users, show_issue, show_user)
-from .sh_fzf import fzf
+from color import Color
+from redman_history import add_history, load_history
+from redmanrc import (create_config_file_default_if_not_exists,
+                      edit_config_file, load_config)
+from redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
+                         list_users, show_issue, show_user)
+from sh_fzf import fzf
 
 
 class Help:

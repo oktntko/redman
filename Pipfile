@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-main = "python -m redman"
+main = "python redman/main.py"
 build = "python setup.py sdist"
 upload = "twine upload --repository pypi dist/*"
 
