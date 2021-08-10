@@ -1,6 +1,3 @@
-# -*- coding=utf-8 -*-
-from __future__ import absolute_import
-
 import os
 import subprocess
 from typing import Optional, Tuple
@@ -30,7 +27,7 @@ def edit_config_file() -> None:
         shell=True, check=False)
 
 
-def load_config(redine_name: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+def load_config(redmine_name: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
 
     if not os.path.exists(REDMANRC):
         return None, None
@@ -38,12 +35,12 @@ def load_config(redine_name: Optional[str]) -> Tuple[Optional[str], Optional[str
     with open(REDMANRC, "r", encoding="UTF-8") as config_file:
         config = yaml.safe_load(config_file)
 
-    if not redine_name:
-        redine_name = config.get("default")
-        if not redine_name:
+    if not redmine_name:
+        redmine_name = config.get("default")
+        if not redmine_name:
             return None, None
 
-    obj = config.get(redine_name)
+    obj = config.get(redmine_name)
 
     if not obj:
         return None, None

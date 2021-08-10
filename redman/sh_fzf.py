@@ -1,6 +1,3 @@
-# -*- coding=utf-8 -*-
-from __future__ import absolute_import
-
 import subprocess
 
 FZF_OPTIONS = "--header-lines=2 \
