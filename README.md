@@ -14,7 +14,7 @@
 ▀███████████   ███    █▄  ███    ███ ███   ███   ███   ███    ███ ███   ███     ,  λ,..,,λΨ  ,
   ███    ███   ███    ███ ███   ▄███ ███   ███   ███   ███    ███ ███   ███   ／i＼/ ・ω・ヽ|／i＼
   ███    ███   ██████████ ████████▀   ▀█   ███   █▀    ███    █▀   ▀█   █▀    ⌒⌒l::.:... ｏ⌒⌒
-  ███    ███                                                                      `'ｰ---‐´l 
+  ███    ███                                                                      `'ｰ----‐´ l 
 ```
 
 <div style="text-align: center; font-size: 24px">
@@ -51,7 +51,7 @@ REDMAN is a command line tool that manages Redmine.
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-""" TODO: Redmineとターミナルが横に並ぶ画面を撮る"""  
+""" TODO: """  
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 When you write a git commit comment, do you find it bothersome to associate it with a Redmine ticket? But it's okay! With REDMAN, you can search for Redmine tickets while you are in the terminal.  
@@ -97,15 +97,15 @@ REDMINE_API_ACCESS_KEY=<your Redmine Access Key>
 ## Usage
 ### Basic usage
 - ```redman projects```
-""" TODO: キャプチャ"""  
+![redman projects](assets/images/redman_projects.png)
 
 - ```redman users```
-""" TODO: キャプチャ"""  
+![redman users](assets/images/redman_users.png)
 
 - ```redman issues```
-""" TODO: キャプチャ"""  
-#### Query
+![redman issues](assets/images/redman_issues.png)
 
+#### Query
 
 ### Powerful usage
 ```command chain```
