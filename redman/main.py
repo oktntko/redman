@@ -1,4 +1,3 @@
-# -*- coding=utf-8 -*-
 from shutil import which
 from typing import Optional
 
@@ -6,13 +5,13 @@ import click
 from click.core import Context
 from texttable import Texttable
 
-from color import Color
-from redman_history import add_history, load_history
-from redmanrc import (create_config_file_default_if_not_exists,
-                      edit_config_file, load_config)
-from redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
-                         list_users, show_issue, show_user)
-from sh_fzf import fzf
+from redman.color import Color
+from redman.redman_history import add_history, load_history
+from redman.redmanrc import (create_config_file_default_if_not_exists,
+                             edit_config_file, load_config)
+from redman.redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
+                                list_users, show_issue, show_user)
+from redman.sh_fzf import fzf
 
 
 class Help:
@@ -270,11 +269,8 @@ def issue(id: str, redmine_name: Optional[str]) -> None:
     print(preview)
 
 
-def cli() -> None:
-    redman(obj={})
-
-
 redman.add_command(show)
 
-if __name__ == "__main__":
-    cli()
+
+def main() -> None:
+    redman(obj={})

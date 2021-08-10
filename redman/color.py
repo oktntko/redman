@@ -1,5 +1,3 @@
-# -*- coding=utf-8 -*-
-
 class Color:
     # https://www.mm2d.net/main/prog/c/console-02.html
 

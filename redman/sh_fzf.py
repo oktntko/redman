@@ -1,4 +1,3 @@
-# -*- coding=utf-8 -*-
 import subprocess
 
 FZF_OPTIONS = "--header-lines=2 \
