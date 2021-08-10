@@ -3,15 +3,16 @@ from typing import Optional
 
 import click
 from click.core import Context
-from texttable import Texttable
 
-from redman.color import Color
-from redman.redman_history import add_history, load_history
-from redman.redmanrc import (create_config_file_default_if_not_exists,
-                             edit_config_file, load_config)
-from redman.redmine_api import (IssueStatus, UserStatus, list_issues, list_projects,
-                                list_users, show_issue, show_user)
-from redman.sh_fzf import fzf
+from redman.config import (create_config_file_default_if_not_exists,
+                           edit_config_file, load_config)
+from redman.helpers.color import Color
+from redman.helpers.fzf import fzf
+from redman.helpers.redmine_api import (IssueStatus, UserStatus, list_issues,
+                                        list_projects, list_users, show_issue,
+                                        show_user)
+from redman.helpers.table import Table
+from redman.history import add_history, load_history
 
 
 class Help:
@@ -80,19 +81,16 @@ def projects(redmine_name: Optional[str]) -> None:
         print("no project")
         return
 
-    rows = [[
+    table = Table([
         "ID", "IDENTIFIER", "NAME", "DESCRIPTION",
-    ]]
-    rows.extend([[
+    ])
+
+    table.add_rows([[
         project.get("id"),
         project.get("identifier"),
         project.get("name"),
         project.get("description"),
     ] for project in projects])
-
-    table = Texttable()
-    table.set_deco(Texttable.HEADER | Texttable.VLINES)
-    table.add_rows(rows)
 
     fzf(table.draw(),
         f"--bind=\"enter:abort+execute({REDMAN_COMMAND} issues --project_id={{1}} --redmine_name={redmine_name or ''} | more > /dev/tty)\"")
@@ -120,10 +118,11 @@ def users(redmine_name: Optional[str]) -> None:
         print("no user")
         return
 
-    rows = [[
+    table = Table([
         "ID", "LOGIN_ID", "NAME", "MAIL", "ADMIN", "LAST_LOGIN_ON",
-    ]]
-    rows.extend([[
+    ])
+
+    table.add_rows([[
         user.get("id"),
         user.get("login"),
         user.get("lastname") + " " + user.get("firstname"),
@@ -131,10 +130,6 @@ def users(redmine_name: Optional[str]) -> None:
         "YES" if user.get("admin") else "",
         user.get("last_login_on"),
     ] for user in users])
-
-    table = Texttable()
-    table.set_deco(Texttable.HEADER | Texttable.VLINES)
-    table.add_rows(rows)
 
     fzf(table.draw(),
         f"--preview=\"redman show user {{1}} --redmine_name={redmine_name or ''}\" \
@@ -166,11 +161,11 @@ def issues(redmine_name: Optional[str], status: str, project_id: Optional[str], 
         print("no issue")
         return
 
-    rows = [[
+    table = Table([
         "ID", "TRACKER", "STATUS", "PRIORITY", "SUBJECT", "ASSIGNED", "DUE_DATE", "DESCRIPTION"
-    ]]
+    ])
 
-    rows.extend([[
+    table.add_rows([[
         issue.get("id"),
         issue.get("tracker").get("name"),
         issue.get("status").get("name"),
@@ -178,12 +173,8 @@ def issues(redmine_name: Optional[str], status: str, project_id: Optional[str], 
         issue.get("subject"),
         issue.get("assigned_to", {}).get("name"),
         issue.get("due_date"),
-        issue.get("description").replace("\n", " "),
+        issue.get("description"),
     ] for issue in issues])
-
-    table = Texttable(max_width=0)
-    table.set_deco(Texttable.HEADER | Texttable.VLINES)
-    table.add_rows(rows)
 
     stdin = table.draw()
     result = fzf(stdin,
@@ -270,7 +261,3 @@ def issue(id: str, redmine_name: Optional[str]) -> None:
 
 
 redman.add_command(show)
-
-
-def main() -> None:
-    redman(obj={})

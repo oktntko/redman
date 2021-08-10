@@ -1,3 +1,3 @@
-from redman.main import main
+from redman.cli import redman
 
-main()
+redman()
