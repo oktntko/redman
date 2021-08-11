@@ -51,8 +51,7 @@ REDMAN is a command line tool that manages Redmine.
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-""" TODO: """  
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+![Product Name Screen Shot][product-screenshot]
 
 When you write a git commit comment, do you find it bothersome to associate it with a Redmine ticket? But it's okay! With REDMAN, you can search for Redmine tickets while you are in the terminal.  
 
@@ -108,14 +107,10 @@ REDMINE_API_ACCESS_KEY=<your Redmine Access Key>
 #### Query
 
 ### Powerful usage
+![command chain](assets/videos/redman.gif)
 ```command chain```
-""" TODO: キャプチャ"""  
-projects -> issues  
-users -> issues  
 If you press enter to select it, it will be automatically set in the issues query.  
-
 ```history```
-""" TODO: キャプチャ"""  
 If you omit the subcommand, the previous query will be executed.
 
 ## Options
@@ -137,4 +132,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [issues-url]: https://github.com/oktntko/redman/issues
 [license-shield]: https://img.shields.io/github/license/oktntko/redman.svg?style=for-the-badge
 [license-url]: https://github.com/oktntko/redman/blob/master/LICENSE
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: assets/images/redman.png
