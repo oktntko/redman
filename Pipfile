@@ -18,6 +18,7 @@ wheel = "*"
 setuptools = "*"
 types-pyyaml = "*"
 build = "*"
+twine = "*"
 
 [requires]
 python_version = "3.9"
